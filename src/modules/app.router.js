@@ -1,4 +1,3 @@
-import authRouter from './auth/auth.router.js';
 import { connectDB } from '../../DB/connection.js';
 import categoriesRouter from './category/category.router.js';
 import productRouter from './product/product.router.js';
@@ -10,7 +9,6 @@ export const initApp = (app,express) => {
     app.get('/', (req, res) => {
         return res.status(200).json({message : 'Welcome to the E-commerce'});
     });
-    app.use('/auth' , authRouter);
     app.use('/categories' , categoriesRouter);
     app.use('/products' , productRouter);
     app.use('*',(req,res) => {
