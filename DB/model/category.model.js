@@ -3,6 +3,7 @@ const categorySchema = new Schema({
     name: {
         type: String,
         required: true,
+        unique: true,
     },
     image:{
         type: Object,
@@ -11,15 +12,14 @@ const categorySchema = new Schema({
     status:{
         type: String,
         enum: ['Active', 'NotActive'],
-        default: 'active'
+        default: 'Active'
     },
     slug:{
         type: String,
-        required: true,
-        unique: true
+        required: true, 
     },
-    createdBy:{ type:Types.ObjectId, ref: 'User', required: true},
-    updatedBy:{ type:Types.ObjectId, ref: 'User', required: true},
+    createdBy:{ type:Types.ObjectId, ref: 'User'},
+    updatedBy:{ type:Types.ObjectId, ref: 'User'},
 }, {
     timestamps: true
 });

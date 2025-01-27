@@ -1,17 +1,17 @@
 import multer from 'multer';
 export const fileMimeTypes = {
-    image : [ 'image/png', 'image/jpeg', 'image/gif', 'image/ico', 'image/svg+xml'],
-    pdf : ['application/pdf']
+    image: ['image/png', 'image/jpeg', 'image/gif', 'image/ico', 'image/svg+xml'],
+    pdf: ['application/pdf']
 }
-export function fileUpload(customTypes = []){
+export function fileUpload(customTypes = []) {
     const storage = multer.diskStorage({});
     function fileFilter(req, file, cb) {
-        if(customTypes.includes(file.mimetype)) {
+        if (customTypes.includes(file.mimetype)) {
             cb(null, true);
-        }else{
-            cb("invalid format" , false);
+        } else {
+            cb("invalid format", false);
         }
     }
-    const upload = multer({ fileFilter , storage });
+    const upload = multer({ fileFilter, storage });
     return upload;
 }
