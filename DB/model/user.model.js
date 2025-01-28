@@ -32,7 +32,7 @@ const userSchema = new Schema({
     status:{
         type: String,
         enum: ['Active', 'NotActive'],
-        default: 'active'
+        default: 'Active'
     },
     role:{
         type: String,
