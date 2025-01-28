@@ -16,7 +16,7 @@ export const auth = (accessRoles = []) => {
         if (!decode) {
             return res.status(401).json({ message: "Invalid token" });
         }
-        const user = await userModel.findById(decode.id).select('userName role');
+        const user = await userModel.findById(decode.id).select('userName role email');
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
