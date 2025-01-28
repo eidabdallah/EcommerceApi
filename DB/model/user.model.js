@@ -18,7 +18,10 @@ const userSchema = new Schema({
     image:{
         type: Object,
     },
-    phoneNumber: String,
+    phoneNumber: {
+        type: String,
+        unique: true,
+    },
     address: String,
     age: Number,
     confirmEmail: {

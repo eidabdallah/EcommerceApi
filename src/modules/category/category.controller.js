@@ -7,20 +7,25 @@ export const createCategory = async (req, res, next) => {
         return res.status(409).json({ message: 'Category already exists' });
     }
     const { secure_url, public_id } = await cloudinary.uploader.upload(req.file.path, {
-        folder: `ecommerce/category`
+        folder: `${process.env.APPNAME}/category`
     });
-
     const category = await categoryModel.create({
         name,
         slug: slugify(name),
         image: { secure_url, public_id },
+        createdBy: req.user._id,
+        updatedBy: req.user._id
     });
     return res.status(201).json({ message: 'Category created successfully', category });
 }
 
 //for admin
 export const getAllCategories = async (req, res, next) => {
-    const categories = await categoryModel.find({});
+    const categories = await categoryModel.find({}).populate([
+        {path : "createdBy" , select : "userName"},
+        {path : "updatedBy" , select : "userName"},
+        {path : "subCategories" }
+    ]);
     if (categories.length > 0)
         return res.status(200).json({ message: 'All categories retrieved successfully', categories });
     return res.status(404).json({ message: 'There are no categories.' });
@@ -53,16 +58,17 @@ export const updateCategory = async (req, res, next) => {
         category.name = req.body.name.toLowerCase();
         category.slug = slugify(req.body.name);
     }
-
     if (req.file) {
         await cloudinary.uploader.destroy(category.image.public_id);
         const { secure_url, public_id } = await cloudinary.uploader.upload(req.file.path, {
-            folder: `ecommerce/category`
+            folder: `${process.env.APPNAME}/category`
         });
         category.image = { secure_url, public_id };
     }
     if (req.body.status)
         category.status = req.body.status;
+
+    category.updatedBy = req.user._id;
     await category.save();
     return res.status(200).json({ message: 'Category updated successfully', category });
 

@@ -5,23 +5,30 @@ const categorySchema = new Schema({
         required: true,
         unique: true,
     },
-    image:{
+    image: {
         type: Object,
         required: true
     },
-    status:{
+    status: {
         type: String,
         enum: ['Active', 'NotActive'],
         default: 'Active'
     },
-    slug:{
+    slug: {
         type: String,
-        required: true, 
+        required: true,
     },
-    createdBy:{ type:Types.ObjectId, ref: 'User'},
-    updatedBy:{ type:Types.ObjectId, ref: 'User'},
+    createdBy: { type: Types.ObjectId, ref: 'User', required: true },
+    updatedBy: { type: Types.ObjectId, ref: 'User', required: true },
 }, {
-    timestamps: true
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+});
+categorySchema.virtual("subCategories", {
+    localField: "_id",
+    foreignField: "categoryId",
+    ref: "Subcategory"
 });
 
 const categoryModel = model('Category', categorySchema);
