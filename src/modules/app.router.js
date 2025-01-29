@@ -3,6 +3,7 @@ import categoriesRouter from './category/category.router.js';
 import subcategoriesRouter from './subCategory/subCategory.router.js';
 import productRouter from './product/product.router.js';
 import authRouter from './auth/auth.router.js';
+import cartRouter from './cart/cart.router.js';
 import cors from 'cors';
 export const initApp = (app,express) => {
     connectDB();
@@ -15,6 +16,7 @@ export const initApp = (app,express) => {
     app.use('/categories' , categoriesRouter);
     app.use('/subCategories' , subcategoriesRouter);
     app.use('/products' , productRouter);
+    app.use('/carts', cartRouter);
 
     app.use('*',(req,res) => {
         return res.status(404).json({message : 'Page Not found'});
