@@ -69,7 +69,7 @@ export const login = async (req, res, next) => {
     return res.status(400).json({ message: 'Invalid credentials' });
   if (user.status == 'NotActive')
     return res.status(400).json({ message: 'Your Account is Blocked' });
-  const token = jwt.sign({ id: user._id, role: user.role, status: user.status }, process.env.JWT_SECRET, { expiresIn: '1h' });
+  const token = jwt.sign({ id: user._id, role: user.role, status: user.status }, process.env.JWT_SECRET, { expiresIn: '10h' });
   return res.status(200).json({ message: 'Logged in successfully', token });
 }
 export const confirmEmail = async (req, res, next) => {

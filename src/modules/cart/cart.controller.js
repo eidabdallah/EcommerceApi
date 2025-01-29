@@ -5,7 +5,7 @@ export const getCart = async (req, res, next) => {
     const cart = await cartModel.findOne({ userId: req.user._id });
     if (!cart)
         return res.status(404).json({ message: 'Cart not found' });
-    res.status(200).json({ message: 'Success', products : cart.products });
+    res.status(200).json({ message: 'Success', products : cart.products , count : cart.products.length});
 }
 export const createCart = async (req, res, next) => {
     const { productId } = req.body;

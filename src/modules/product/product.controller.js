@@ -5,7 +5,7 @@ import cloudinary from './../../utils/cloudinary.js';
 import productModel from '../../../DB/model/product.model.js';
 
 export const createProduct = async (req, res, next) => {
-    const { name, price, description, categoryId, discount, subcategoryId } = req.body;
+    const { name, price, description, categoryId, discount, subcategoryId , stock} = req.body;
     const checkCategory = await categoryModel.findById(categoryId);
     if (!checkCategory)
         return res.status(404).json({ message: 'Category not found' });

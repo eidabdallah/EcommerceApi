@@ -8,7 +8,7 @@ const productSchema = new Schema({
     },
     slug: { type: String, required: true, },
     description: { type: String, required: true },
-    stock: { type: Number, defaultValue: 1 },
+    stock: { type: Number, default: 1 },
     price: { type: Number, required: true },
     discount: { type: Number, default: 0 },
     finalPrice: {
