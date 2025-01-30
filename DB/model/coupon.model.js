@@ -12,7 +12,8 @@ const couponSchema = new Schema({
         required: true,
     }],
     expireDate: { type: Date, required: true },
-    createdBy: { type: Types.ObjectId, required: true, ref: 'User' }
+    createdBy: { type: Types.ObjectId, required: true, ref: 'User' },
+    updatedBy: { type: Types.ObjectId, required: true, ref: 'User'}
 }, {
     timestamps: true,
 });
