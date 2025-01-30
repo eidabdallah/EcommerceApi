@@ -21,11 +21,12 @@ export const createOrder = async (req, res, next) => {
         if (!coupon || coupon.expireDate < new Date()) {
             return res.status(400).json({ message: 'Coupon is invalid or expired.' });
         }
-        if (coupon.usedBy.includes(req.user._id)) {
+        if (coupon.usedBy.toString().includes(req.user._id.toString())) {
             return res.status(409).json({ message: 'Coupon already used' });
         }
         req.body.coupon = coupon;
     }
+
     let finalProductList = [];
     let subTotal = 0;
     for (let product of req.body.products) {
@@ -65,7 +66,7 @@ export const createOrder = async (req, res, next) => {
         }
         // if coupon is used , add user id to usedBy array in coupon model.
         if (req.body.coupon) {
-            await couponModel.updateOne({ _id: req.body.coupon._id }, { $addToSet: { usedBy: req.user._id } });
+            await couponModel.updateOne({ _id: req.body.coupon._id }, { $addToSet: { usedBy: req.user._id } })
         }
         //remove product from cart
         await cartModel.updateOne({ userId: req.user._id }, { products: [] });
@@ -74,4 +75,40 @@ export const createOrder = async (req, res, next) => {
 
 
 
+}
+// for admin
+export const getAllOrder = async (req, res, next) => {
+    const orders = await orderModel.find({ $or: [{ status: 'pending' }, { status: 'confirmed' }] });
+    if (orders.length > 0)
+        return res.status(200).json({ message: 'All orders retrieved successfully', orders });
+    return res.status(404).json({ message: 'There are no orders.' });
+}
+// for admin
+export const changeStatusOrder = async (req, res, next) => {
+    const { orderId } = req.params;
+    const { newStatus } = req.body;
+    const validStatuses = ["pending", "cancelled", "confirmed", "onway", "delivered"];
+    if (!validStatuses.includes(newStatus)) {
+        return res.status(400).json({ message: "Invalid status value. Allowed values: pending, cancelled, confirmed, onway, delivered" });
+    }
+    const order = await orderModel.findById(orderId);
+    if (!order)
+        return res.status(404).json({ message: 'Order not found.' });
+    if (order.status == "delivered") {
+        return res.status(400).json({ message: "Cannot update a delivered order." });
+    }
+    if (order.status == "onway" && newStatus != "delivered") {
+        return res.status(400).json({ message: "An order in 'onway' status can only be changed to 'delivered'." });
+    }
+    order.updatedBy = req.user._id;
+    order.status = newStatus;
+    await order.save();
+    return res.status(200).json({ message: 'Order status updated successfully', order });
+}
+
+export const getAllOrderForUser = async (req, res, next) => {
+    const orders = await orderModel.find({ userId: req.user._id });
+    if (orders.length > 0)
+        return res.status(200).json({ message: 'All orders retrieved successfully', orders });
+    return res.status(404).json({ message: 'There are no orders.' });
 }
