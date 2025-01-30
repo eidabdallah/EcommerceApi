@@ -40,6 +40,7 @@ export const updateCoupon = async (req, res, next) => {
                 return res.status(400).json({ message: 'Coupon amount can not be less than or equal to zero' });
             coupon.amount = amount;
         }
+        coupon.updatedBy = req.user._id;
         await coupon.save();
         return res.status(200).json({ message: 'Coupon updated successfully', coupon });
     }
