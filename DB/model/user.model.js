@@ -15,7 +15,7 @@ const userSchema = new Schema({
         type: String,
         required: true
     },
-    image:{
+    image: {
         type: Object,
     },
     phoneNumber: {
@@ -23,7 +23,6 @@ const userSchema = new Schema({
         unique: true,
     },
     address: String,
-    age: Number,
     confirmEmail: {
         type: Boolean,
         default: false
@@ -32,17 +31,17 @@ const userSchema = new Schema({
         type: String,
         enum: ['Male', 'Female'],
     },
-    status:{
+    status: {
         type: String,
         enum: ['Active', 'NotActive'],
         default: 'Active'
     },
-    role:{
+    role: {
         type: String,
         enum: ['Admin', 'User'],
         default: 'User'
     },
-    sendCode:{
+    sendCode: {
         type: String,
         default: null
     }

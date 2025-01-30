@@ -6,6 +6,7 @@ import authRouter from './auth/auth.router.js';
 import cartRouter from './cart/cart.router.js';
 import orderRouter from './order/order.router.js';
 import couponRouter from './coupon/coupon.router.js';
+import userRouter from './user/user.router.js';
 
 import cors from 'cors';
 export const initApp = (app,express) => {
@@ -15,7 +16,8 @@ export const initApp = (app,express) => {
     app.get('/', (req, res) => {
         return res.status(200).json({message : 'Welcome to the E-commerce'});
     });
-    app.use('/auth' , authRouter)
+    app.use('/auth' , authRouter);
+    app.use('/user' , userRouter);
     app.use('/categories' , categoriesRouter);
     app.use('/subCategories' , subcategoriesRouter);
     app.use('/products' , productRouter);
