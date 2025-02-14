@@ -6,5 +6,6 @@ export const endPoints = {
     getUserById : [roles.USER,roles.ADMIN],
     updateUser : [roles.USER,roles.ADMIN],
     deleteUser : [roles.ADMIN],
-    updateStatus : [roles.ADMIN]
+    updateStatus : [roles.ADMIN],
+    changeEmailConfirmation : [roles.ADMIN]
 }

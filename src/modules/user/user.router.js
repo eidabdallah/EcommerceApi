@@ -9,5 +9,7 @@ router.get('/' , auth(endPoints.getAllUser) , userController.getAllUser);
 router.get('/userData' , auth(endPoints.getUserById) , userController.getUserInformation);
 router.delete('/:id' , auth(endPoints.deleteUser) , userController.deleteUser);
 router.patch('/:id' , auth(endPoints.updateStatus) , userController.updateUserStatus);
+router.patch('confimEmail/:id' , auth(endPoints.changeEmailConfirmation) , userController.changeEmailConfirm);
+
 
 export default router;

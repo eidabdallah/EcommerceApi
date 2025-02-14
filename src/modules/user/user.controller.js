@@ -5,7 +5,7 @@ import cartModel from './../../../DB/model/cart.model.js';
 import bcrypt from 'bcryptjs';
 
 export const getAllUser = async (req, res, next) => {
-    const users = await userModel.find({}).select("-password");
+    const users = await userModel.find({}).select("-password -sendCode");
     if (users.length > 0)
         return res.status(200).json({ message: 'All users retrieved successfully', users });
     return res.status(404).json({ message: 'There are no users.' });
@@ -90,9 +90,16 @@ export const adminResetUserCredentials = async (req, res, next) => {
     if (email != user.email)
         return res.status(400).json({ message: "Email does not match with user's email" });
     
-    await sendConfirmEmail(email, (user.userName || req.user.userName), req);
-
     user.password = bcrypt.hashSync(password, parseInt(process.env.SALTROUND));
     await user.save();
     return res.status(200).json({ message: "User credentials updated successfully" });
+}
+export const changeEmailConfirm = async (req, res, next) => {
+    const { id } = req.params;
+    const { confirmEmailValue } = req.body;
+    const user = await userModel.findByIdAndUpdate(id, { confirmEmail: confirmEmailValue });
+    if (!user)
+        return res.status(404).json({ message: "User not found" });
+    return res.status(200).json({ message: `User confirmEmail value updated to ${confirmEmailValue}` });
+
 }
