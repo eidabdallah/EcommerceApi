@@ -17,7 +17,7 @@ export const register = async (req, res, next) => {
   const createUser = await userModel.create({ userName, email, password: hashPassword, phoneNumber, address });
 
   await sendConfirmEmail(email, userName, req);
-  res.status(201).json({ message: 'User registered successfully', user: createUser });
+  return res.status(201).json({ message: 'User registered successfully', user: createUser });
 }
 export const login = async (req, res, next) => {
   const { email, password } = req.body;
@@ -71,7 +71,7 @@ export const forgetPassword = async (req, res, next) => {
   user.password = bcrypt.hashSync(password, parseInt(process.env.SALTROUND));
   user.sendCode = null;
   await user.save();
-  res.status(200).json({ message: 'Password reset successfully' });
+  return res.status(200).json({ message: 'Password reset successfully' });
 }
 
 export const changePassword = async (req, res, next) => {
@@ -86,5 +86,5 @@ export const changePassword = async (req, res, next) => {
     return res.status(403).json({ message: 'Invalid old password' });
   user.password = bcrypt.hashSync(newPassword, parseInt(process.env.SALTROUND));
   await user.save();
-  res.status(200).json({ message: 'Password changed successfully' });
+  return res.status(200).json({ message: 'Password changed successfully' });
 }
