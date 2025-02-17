@@ -28,28 +28,24 @@ export const createProduct = async (req, res, next) => {
     req.body.createdBy = req.user._id;
     req.body.updatedBy = req.user._id;
     const product = await productModel.create(req.body);
-    res.status(201).json({ message: 'Product created successfully', product });
+    return res.status(201).json({ message: 'Product created successfully', product });
 
 }
 
-// export const getAllProducts = async (req, res, next) => {}
+export const getAllProducts = async (req, res, next) => {
+    const products = await productModel.find({});
+    if (products.length > 0)
+        return res.status(200).json({ message: 'All products retrieved successfully', products });
+    return res.status(404).json({ message: 'No products found' });
+}
 
-// export const getProductById = async (req, res, next) => {}
+export const getProductById = async (req, res, next) => {
+    const product = await productModel.findById(req.params.id).populate({
+        path : 'reviews',
+        populate: { path : 'userId' , select : 'userName -_id'}
+    });
+    if (!product)
+        return res.status(404).json({ message: 'Product not found' });
+    return res.status(200).json({ message: 'Product retrieved successfully', product });
+}
 
-// export const updateProduct = async (req, res, next) => {}
-
-// export const deleteProduct = async (req, res, next) => {}
-
-// export const getAllProductsActive = async (req, res, next) => {}
-
-// export const getAllProductsByCategory = async (req, res, next) => {}
-
-// export const getAllProductsBySubCategory = async (req, res, next) => {}
-
-// export const getProductsBySearch = async (req, res, next) => {}
-
-// export const updateProductStock = async (req, res, next) => {}
-
-// export const updateProductDiscount = async (req, res, next) => {}
-
-// export const getAllProductsByPriceRange = async (req, res, next) => {}

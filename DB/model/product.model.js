@@ -33,8 +33,15 @@ const productSchema = new Schema({
     updatedBy: { type: Types.ObjectId, ref: 'User', required: true },
 }, {
     timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
 });
 
+productSchema.virtual('reviews' , {
+    ref: 'Review',
+    localField: '_id',
+    foreignField: 'productId',
+});
 
 const productModel = model('Product', productSchema);
 export default productModel;

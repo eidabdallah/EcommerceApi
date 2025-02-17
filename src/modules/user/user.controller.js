@@ -1,6 +1,5 @@
 import userModel from "../../../DB/model/user.model.js";
 import cloudinary from './../../utils/cloudinary.js';
-import { sendConfirmEmail } from './../auth/authHelpers.js';
 import cartModel from './../../../DB/model/cart.model.js';
 import bcrypt from 'bcryptjs';
 

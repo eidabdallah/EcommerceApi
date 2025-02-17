@@ -7,7 +7,7 @@ import cartRouter from './cart/cart.router.js';
 import orderRouter from './order/order.router.js';
 import couponRouter from './coupon/coupon.router.js';
 import userRouter from './user/user.router.js';
-
+import reviewRouter from './review/review.router.js';
 import cors from 'cors';
 export const initApp = (app,express) => {
     connectDB();
@@ -24,6 +24,8 @@ export const initApp = (app,express) => {
     app.use('/cart', cartRouter);
     app.use('/order', orderRouter);
     app.use('/coupon', couponRouter);
+    app.use('/review', reviewRouter);
+
 
 
     app.use('*',(req,res) => {

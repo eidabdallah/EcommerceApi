@@ -5,7 +5,7 @@ export const getCart = async (req, res, next) => {
     const cart = await cartModel.findOne({ userId: req.user._id });
     if (!cart)
         return res.status(404).json({ message: 'Cart not found' });
-    res.status(200).json({ message: 'Success', products : cart.products , count : cart.products.length});
+    return res.status(200).json({ message: 'Success', products : cart.products , count : cart.products.length});
 }
 export const createCart = async (req, res, next) => {
     const { productId } = req.body;
@@ -20,8 +20,9 @@ export const createCart = async (req, res, next) => {
             userId: req.user._id,
             products: { productId },
         });
-        res.status(201).json({ message: 'Product added to cart', cart: newCart });
+        return res.status(201).json({ message: 'Product added to cart', cart: newCart });
     }
+    
     // if have cart already been created , need to check if it exists or not .
     for (let i = 0; i < cart.products.length; i++) {
         if (cart.products[i].productId == productId) {
@@ -30,7 +31,7 @@ export const createCart = async (req, res, next) => {
     }
     cart.products.push({ productId });
     await cart.save();
-    res.status(200).json({ message: 'Product added to cart', cart });
+    return res.status(200).json({ message: 'Product added to cart', cart });
 }
 
 export const deleteProductFromCart = async (req, res, next) => {
@@ -44,7 +45,7 @@ export const deleteProductFromCart = async (req, res, next) => {
         { $pull: { products: { productId } } },
         { new: true }
     );
-    res.status(200).json({ message: 'Product removed from cart', updatedCart });
+    return res.status(200).json({ message: 'Product removed from cart', updatedCart });
 }
 
 export const clearCart = async (req, res, next) => {
@@ -53,7 +54,7 @@ export const clearCart = async (req, res, next) => {
         { products: [] },
         { new: true }
     );
-    res.status(200).json({ message: 'Cart cleared', cart });
+    return res.status(200).json({ message: 'Cart cleared', cart });
 }
 
 export const updateProductQuantity = async (req, res, next) => {
@@ -78,5 +79,5 @@ export const updateProductQuantity = async (req, res, next) => {
         );
     }
 
-    res.status(200).json({ message: "Product quantity updated", cart });
+    return res.status(200).json({ message: "Product quantity updated", cart });
 };
