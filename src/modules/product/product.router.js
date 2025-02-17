@@ -10,8 +10,8 @@ router.use('/:productId/review' , reviewRouter);
 router.post('/', auth(endPoints.create), fileUpload(fileMimeTypes.image).fields([
     {name:'mainImage' , maxCount : 1}, {name:'subImages', maxCount: 5}])
     , productController.createProduct);
-router.get('/' , auth(endPoints.AllProducts) , productController.getAllProducts);
-router.get('/:id' , auth(endPoints.getProduct) , productController.getProductById);
+router.get('/' ,  productController.getAllProducts);
+router.get('/:id' ,  productController.getProductById);
 
 
 export default router;
