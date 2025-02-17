@@ -2,20 +2,12 @@ import userModel from "../../../DB/model/user.model.js";
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { customAlphabet } from "nanoid";
-import { sendCodeToEmail, sendConfirmEmail } from "./authHelpers.js";
+import { confirmEmailMessage, sendCodeToEmail, sendConfirmEmail } from "../../utils/authTemplete.js";
 
 export const register = async (req, res, next) => {
   const { userName, email, password, phoneNumber, address } = req.body;
-  const user = await userModel.findOne({ email });
-  if (user)
-    return res.status(409).json({ message: 'User already exists' });
-  const checkPhone = await userModel.findOne({ phoneNumber });
-  if (checkPhone)
-    return res.status(409).json({ message: 'Phone number already exists' });
-
   const hashPassword = bcrypt.hashSync(password, parseInt(process.env.SALTROUND));
   const createUser = await userModel.create({ userName, email, password: hashPassword, phoneNumber, address });
-
   await sendConfirmEmail(email, userName, req);
   return res.status(201).json({ message: 'User registered successfully', user: createUser });
 }
@@ -38,9 +30,13 @@ export const login = async (req, res, next) => {
 export const confirmEmail = async (req, res, next) => {
   const { token } = req.params;
   const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-  const user = await userModel.updateOne({ email: decodedToken.email }, { confirmEmail: true });
-  if (user.modifiedCount > 0) {
-    return res.redirect("http://localhost:5173/auth");
+  const user = await userModel.findOneAndUpdate(
+    { email: decodedToken.email },
+    { confirmEmail: true },
+    { new: true }
+  );
+  if (user) {
+    await confirmEmailMessage(user.userName, res);
   }
 }
 
@@ -57,7 +53,7 @@ export const sendCode = async (req, res, next) => {
     user.sendCode = null;
     await user.save();
   }, 5 * 60 * 1000);
-  res.status(200).json({ message: 'Code sent successfully' });
+  return res.status(200).json({ message: 'Code sent successfully' });
 }
 
 export const forgetPassword = async (req, res, next) => {

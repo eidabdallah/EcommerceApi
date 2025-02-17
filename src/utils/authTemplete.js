@@ -1,11 +1,11 @@
-import { sendEmail } from "../../utils/sendEmail.js";
+import { sendEmail } from "./sendEmail.js";
 import jwt from 'jsonwebtoken';
 
 
 export const sendConfirmEmail = async (email, userName, req) => {
-    const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: 60 * 5 });
-    const refreshToken = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    const html = `
+  const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: 60 * 5 });
+  const refreshToken = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '1h' });
+  const html = `
      <div style="font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f9f9f9;">
     <div style="max-width: 600px; margin: auto; background: linear-gradient(135deg, #007bff, #6c757d); padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
       <div style="border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 20px;">
@@ -40,17 +40,18 @@ export const sendConfirmEmail = async (email, userName, req) => {
     </div>
   </div>
   `;
-    await sendEmail(email, 'Confirm Email', html);
+  await sendEmail(email, 'Confirm Email', html);
 }
 
-export const sendCodeToEmail = async (email , code) => {
-    const html = `<div style="font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f9f9f9;">
+export const sendCodeToEmail = async (email, code) => {
+  const html = `
+   <div style="font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f9f9f9;">
     <div style="max-width: 600px; margin: auto; background: linear-gradient(135deg, #007bff, #6c757d); padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
       <div style="border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 20px;">
         <div style="display: inline-block; border-radius: 50%; padding: 20px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
           <img src="https://res.cloudinary.com/deylqxzgk/image/upload/v1738093063/logo_h7fcb2.png" 
-               alt="App Logo" 
-               style="width: 100px; display: block; margin: auto;" />
+               alt="${process.env.APPNAME} Logo" 
+               style="width: 250px; display: block; margin: auto;" />
         </div>
         <h1 style="color: white; font-size: 28px; margin-top: 20px;">Your Verification Code</h1>
       </div>
@@ -70,4 +71,35 @@ export const sendCodeToEmail = async (email , code) => {
     </div>
   </div>`;
   await sendEmail(email, 'Reset Password', html);
+}
+
+export const confirmEmailMessage = (name, res) => {
+  const html = `
+                <div style="font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f9f9f9;">
+    <div style="max-width: 600px; margin: auto; background: linear-gradient(135deg, #007bff, #6c757d); padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
+      <div style="border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 20px;">
+        <div style="display: inline-block; border-radius: 50%; padding: 20px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+          <img src="https://res.cloudinary.com/deylqxzgk/image/upload/v1738093063/logo_h7fcb2.png" 
+               alt="${process.env.APPNAME} Logo" 
+               style="width: 250px; display: block; margin: auto;" />
+        </div>
+                            <h1 style="color: white; font-size: 28px; margin-top: 20px;">Thank you for confirming your email, ${name}!</h1>
+                        </div>
+                        <p style="font-size: 16px; color: #f8f9fa; line-height: 1.5;">
+                            Your email has been successfully confirmed. You can now access your account and enjoy all the features of <b>${process.env.APPNAME}</b>!
+                        </p>
+                        <p style="font-size: 16px; color: #f8f9fa; line-height: 1.5;">
+                            We’re glad to have you onboard, and we look forward to serving you.
+                        </p>
+                        <p style="font-size: 14px; color: #f8f9fa; margin: 20px 0;">
+                            If you have any questions or need assistance, feel free to contact our support team.
+                        </p>
+                        <hr style="border: none; border-top: 1px solid #6c757d; margin: 20px 0;" />
+                        <footer style="font-size: 12px; color: #dee2e6; text-align: center;">
+                            <p>© ${new Date().getFullYear()} ${process.env.APPNAME}. All rights reserved.</p>
+                        </footer>
+                    </div>
+                </div>
+            `;
+  return res.send(html);
 }

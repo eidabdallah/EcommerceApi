@@ -2,14 +2,15 @@ import { Router } from "express";
 import * as userController from "./user.controller.js";
 import { auth } from "../../middleware/auth.middleware.js";
 import { endPoints } from "./user.role.js";
+import { asyncHandler } from "../../utils/asyncHandler.js";
 const router = Router({ caseSensitive: true});
 
 
-router.get('/' , auth(endPoints.getAllUser) , userController.getAllUser);
-router.get('/userData' , auth(endPoints.getUserById) , userController.getUserInformation);
-router.delete('/:id' , auth(endPoints.deleteUser) , userController.deleteUser);
-router.patch('/:id' , auth(endPoints.updateStatus) , userController.updateUserStatus);
-router.patch('confimEmail/:id' , auth(endPoints.changeEmailConfirmation) , userController.changeEmailConfirm);
+router.get('/' , asyncHandler(auth(endPoints.getAllUser)) , asyncHandler(userController.getAllUser));
+router.get('/userData' , asyncHandler(auth(endPoints.getUserById)) , asyncHandler(userController.getUserInformation));
+router.delete('/:id' , asyncHandler(auth(endPoints.deleteUser)) , asyncHandler(userController.deleteUser));
+router.patch('/:id' , asyncHandler(auth(endPoints.updateStatus)) , asyncHandler(userController.updateUserStatus));
+router.patch('confimEmail/:id' , asyncHandler(auth(endPoints.changeEmailConfirmation)) , asyncHandler(userController.changeEmailConfirm));
 
 
 export default router;
