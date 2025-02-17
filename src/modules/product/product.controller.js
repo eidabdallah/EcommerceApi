@@ -43,8 +43,8 @@ export const createProduct = async (req, res, next) => {
 
 export const getAllProducts = async (req, res, next) => {
     const { skip, limit } = pagination(req.query.page, req.query.limit);
-    let queryObj = {...req.query};
-    const excludeQuery = ['page', 'limit' , 'sort'];
+    let queryObj = { ...req.query };
+    const excludeQuery = ['page', 'limit', 'sort', 'search', 'fields'];
     excludeQuery.map((ele) => delete queryObj[ele]);
 
     // filter : 
@@ -54,9 +54,20 @@ export const getAllProducts = async (req, res, next) => {
     // convert to Object : 
     queryObj = JSON.parse(queryObj);
     const productQuery = productModel.find(queryObj).skip(skip).limit(limit);
+    // search  :
+    if (req.query.search) {
+        productQuery.find({
+            $or: [
+                { name: { $regex: req.query.search } },
+                { description: { $regex: req.query.search } },
+            ]
+        })
+    }
     const count = await productModel.estimatedDocumentCount();
-    const products = await productQuery.sort(req.query.sort); 
-    return res.status(200).json({ message: 'All products retrieved successfully', count ,  products });
+    if (req.query.fields)
+        productQuery.select(req.query.fields);
+    const products = await productQuery.sort(req.query.sort);
+    return res.status(200).json({ message: 'All products retrieved successfully', count, products });
 }
 
 export const getProductById = async (req, res, next) => {
