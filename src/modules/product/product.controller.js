@@ -5,21 +5,20 @@ import cloudinary from './../../utils/cloudinary.js';
 import productModel from '../../../DB/model/product.model.js';
 import { pagination } from '../../utils/pagination.js';
 import { request } from 'express';
+import { AppError } from './../../utils/AppError.js';
 
 export const createProduct = async (req, res, next) => {
     const { name, price, description, categoryId, discount, subcategoryId, stock } = req.body;
     const checkCategory = await categoryModel.findById(categoryId);
     if (!checkCategory)
-        return res.status(404).json({ message: 'Category not found' });
+        return next(new AppError('Category not found', 404));
     const checkSubCategory = await subCategoryModel.findOne({ _id: subcategoryId, categoryId });
     if (!checkSubCategory)
-        return res.status(404).json({ message: 'Subcategory does not belong to the selected category' });
+        return next(new AppError('Subcategory does not belong to the selected category', 404));
 
     const checkName = await productModel.findOne({ name });
     if (checkName)
-        return res.status(409).json({ message: 'Product already exists' });
-
-
+        return next(new AppError('Product already exists', 409));
 
     req.body.slug = slugify(name);
     req.body.finalPrice = price - ((price * (discount || 0)) / 100);
@@ -76,7 +75,7 @@ export const getProductById = async (req, res, next) => {
         populate: { path: 'userId', select: 'userName -_id' }
     });
     if (!product)
-        return res.status(404).json({ message: 'Product not found' });
+        return next(new AppError('Product not found', 404));
     return res.status(200).json({ message: 'Product retrieved successfully', product });
 }
 

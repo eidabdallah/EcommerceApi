@@ -2,17 +2,16 @@ import subCategoryModel from '../../../DB/model/subCategory.model.js';
 import cloudinary from './../../utils/cloudinary.js';
 import slugify from 'slugify';
 import categoryModel from './../../../DB/model/category.model.js';
+import { AppError } from './../../utils/AppError.js';
 export const createSubCategory = async (req, res, next) => {
-    const {categoryId} = req.body;
-    if (!categoryId)
-        return res.status(400).json({ message: 'Category ID is required.' });
+    const { categoryId } = req.body;
     const category = await categoryModel.findById(categoryId);
     if (!category)
-        return res.status(404).json({ message: 'Category not found.' });
+        return next(new AppError('Category ID is required.', 400));
 
     const name = req.body.name.toLowerCase();
     if (await subCategoryModel.findOne({ name })) {
-        return res.status(409).json({ message: 'Category already exists' });
+        return next(new AppError('Category not found.', 404));
     }
     const { secure_url, public_id } = await cloudinary.uploader.upload(req.file.path, {
         folder: `${process.env.APPNAME}/subcategories`
@@ -30,37 +29,35 @@ export const createSubCategory = async (req, res, next) => {
 
 //for admin
 export const getAllSubCategoriesByCategory = async (req, res, next) => {
-    const {id} = req.params;
-    const subcategories = await subCategoryModel.find({categoryId : id});
+    const { id } = req.params;
+    const subcategories = await subCategoryModel.find({ categoryId: id });
     if (subcategories.length > 0)
         return res.status(200).json({ message: 'All Subcategories for this Category retrieved successfully', subcategories });
-    return res.status(404).json({ message: 'There are no sub categories for this category' });
+    return next(new AppError('There are no sub categories for this category', 404));
 }
 // for user 
 export const getAllSubCategoriesActiveByCategory = async (req, res, next) => {
-    const {id} = req.params;
-    const subcategories = await subCategoryModel.find({categoryId : id , status: 'Active'});
+    const { id } = req.params;
+    const subcategories = await subCategoryModel.find({ categoryId: id, status: 'Active' });
     if (subcategories.length > 0)
         return res.status(200).json({ message: 'All Subcategories for this Category retrieved successfully', subcategories });
-    return res.status(404).json({ message: 'There are no sub categories for this category' });
+    return next(new AppError('There are no sub categories for this category', 404));
 }
 
 export const getSubCategoryById = async (req, res, next) => {
     const subCategory = await subCategoryModel.findById(req.params.id).select('name image slug');
     if (!subCategory)
-        return res.status(404).json({ message: 'SubCategory not found.' });
+        return next(new AppError('SubCategory not found.', 404));
     return res.status(200).json({ message: 'SubCategory retrieved successfully', subCategory });
 }
 
 export const updateSubCategory = async (req, res, next) => {
-    if (!(req.params.id))
-        return res.status(400).json({ message: 'Sub Category ID is required.' });
     const subcategory = await subCategoryModel.findById(req.params.id);
     if (!subcategory)
-        return res.status(404).json({ message: 'Sub Category not found.' });
+        return next(new AppError('Sub Category not found.', 404));
     if (req.body.name) {
-        if (await subCategoryModel.findOne({ name: req.body.name.toLowerCase() , _id:{$ne: req.params.id} })) {
-            return res.status(409).json({ message: 'Sub Category Name already exists' });
+        if (await subCategoryModel.findOne({ name: req.body.name.toLowerCase(), _id: { $ne: req.params.id } })) {
+            return next(new AppError('Sub Category Name already exists', 409));
         }
         subcategory.name = req.body.name.toLowerCase();
         subcategory.slug = slugify(req.body.name);
@@ -82,11 +79,9 @@ export const updateSubCategory = async (req, res, next) => {
 }
 
 export const deleteSubCategory = async (req, res, next) => {
-    if (!(req.params.id))
-        return res.status(400).json({ message: 'Sub Category ID is required.' });
     const subcategory = await subCategoryModel.findByIdAndDelete(req.params.id);
     if (!subcategory)
-        return res.status(404).json({ message: 'Category not found.' });
+        return next(new AppError('SubCategory not found.', 404));
     await cloudinary.uploader.destroy(subcategory.image.public_id);
     return res.status(200).json({ message: 'Category deleted successfully' });
 }

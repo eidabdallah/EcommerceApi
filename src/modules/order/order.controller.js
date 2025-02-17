@@ -3,13 +3,14 @@ import couponModel from './../../../DB/model/coupon.model.js';
 import orderModel from './../../../DB/model/order.model.js';
 import productModel from './../../../DB/model/product.model.js';
 import userModel from './../../../DB/model/user.model.js';
+import { AppError } from './../../utils/AppError.js';
 
 export const createOrder = async (req, res, next) => {
 
     // check if have product in cart
     const cart = await cartModel.findOne({ userId: req.user._id });
     if (!cart || cart.products.length === 0) {
-        return res.status(400).json({ message: 'Cart is Empty.' });
+        return next(new AppError('Cart is Empty.', 400));
     }
     // if the user have product in cart , put the product in req.body.product
     req.body.products = cart.products;
@@ -19,10 +20,10 @@ export const createOrder = async (req, res, next) => {
     if (req.body.couponName) {
         const coupon = await couponModel.findOne({ name: req.body.couponName });
         if (!coupon || coupon.expireDate < new Date()) {
-            return res.status(400).json({ message: 'Coupon is invalid or expired.' });
+            return next(new AppError('Coupon is invalid or expired.', 400));
         }
         if (coupon.usedBy.toString().includes(req.user._id.toString())) {
-            return res.status(409).json({ message: 'Coupon already used' });
+            return next(new AppError('Coupon already used', 409));
         }
         req.body.coupon = coupon;
     }
@@ -33,7 +34,7 @@ export const createOrder = async (req, res, next) => {
         // check product quantity
         const checkProduct = await productModel.findOne({ _id: product.productId, stock: { $gte: product.quantity } });
         if (!checkProduct) {
-            return res.status(400).json({ message: 'Not enough stock for some products.' });
+            return next(new AppError('Not enough stock for some products.', 400));
         }
         product = product.toObject();
         product.productName = checkProduct.name;
@@ -71,6 +72,8 @@ export const createOrder = async (req, res, next) => {
         //remove product from cart
         await cartModel.updateOne({ userId: req.user._id }, { products: [] });
         return res.status(201).json({ message: 'Order created successfully', order })
+    } else {
+        return next(new AppError('Order creation failed.', 500));
     }
 
 
@@ -81,7 +84,7 @@ export const getAllOrder = async (req, res, next) => {
     const orders = await orderModel.find({ $or: [{ status: 'pending' }, { status: 'confirmed' }] });
     if (orders.length > 0)
         return res.status(200).json({ message: 'All orders retrieved successfully', orders });
-    return res.status(404).json({ message: 'There are no orders.' });
+    return next(new AppError('There are no orders.', 404));
 }
 // for admin
 export const changeStatusOrder = async (req, res, next) => {
@@ -89,16 +92,16 @@ export const changeStatusOrder = async (req, res, next) => {
     const { newStatus } = req.body;
     const validStatuses = ["pending", "cancelled", "confirmed", "onway", "delivered"];
     if (!validStatuses.includes(newStatus)) {
-        return res.status(400).json({ message: "Invalid status value. Allowed values: pending, cancelled, confirmed, onway, delivered" });
+        return next(new AppError('Invalid status value. Allowed values: pending, cancelled, confirmed, onway, delivered', 400));
     }
     const order = await orderModel.findById(orderId);
     if (!order)
-        return res.status(404).json({ message: 'Order not found.' });
+        return next(new AppError('Order not found.', 404));
     if (order.status == "delivered") {
-        return res.status(400).json({ message: "Cannot update a delivered order." });
+        return next(new AppError('Cannot update a delivered order.', 400));
     }
     if (order.status == "onway" && newStatus != "delivered") {
-        return res.status(400).json({ message: "An order in 'onway' status can only be changed to 'delivered'." });
+        return next(new AppError("An order in 'onway' status can only be changed to 'delivered'.", 400));
     }
     order.updatedBy = req.user._id;
     order.status = newStatus;
@@ -110,5 +113,5 @@ export const getAllOrderForUser = async (req, res, next) => {
     const orders = await orderModel.find({ userId: req.user._id });
     if (orders.length > 0)
         return res.status(200).json({ message: 'All orders retrieved successfully', orders });
-    return res.status(404).json({ message: 'There are no orders.' });
+    return next(new AppError('There are no orders.', 404));
 }

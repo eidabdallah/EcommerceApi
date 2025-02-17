@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { customAlphabet } from "nanoid";
 import { confirmEmailMessage, sendCodeToEmail, sendConfirmEmail } from "../../utils/authTemplete.js";
+import { AppError } from "../../utils/AppError.js";
 
 export const register = async (req, res, next) => {
   const { userName, email, password, phoneNumber, address } = req.body;
@@ -14,16 +15,12 @@ export const register = async (req, res, next) => {
 export const login = async (req, res, next) => {
   const { email, password } = req.body;
   const user = await userModel.findOne({ email });
-  if (!user)
-    return res.status(400).json({ message: 'Invalid credentials' });
-  if (!user.confirmEmail)
-    return res.status(403).json({ message: 'Please confirm your email' });
+  if (!user) return next(new AppError('Invalid credentials', 400));
+  if (!user.confirmEmail) return next(new AppError('Please confirm your email', 403));
 
   const isMatch = bcrypt.compareSync(password, user.password);
-  if (!isMatch)
-    return res.status(400).json({ message: 'Invalid credentials' });
-  if (user.status == 'NotActive')
-    return res.status(400).json({ message: 'Your Account is Blocked' });
+  if (!isMatch) return next(new AppError('Invalid credentials', 400));
+  if (user.status === 'NotActive') return next(new AppError('Your Account is Blocked', 400));
   const token = jwt.sign({ id: user._id, role: user.role, status: user.status }, process.env.JWT_SECRET, { expiresIn: '10h' });
   return res.status(200).json({ message: 'Logged in successfully', token });
 }
@@ -43,8 +40,7 @@ export const confirmEmail = async (req, res, next) => {
 export const sendCode = async (req, res, next) => {
   const { email } = req.body;
   const user = await userModel.findOne({ email });
-  if (!user)
-    return res.status(404).json({ message: 'Email not found' });
+  if (!user) return next(new AppError('Email not found', 404));
   const code = customAlphabet('123456789abcdefghijklmnopqrstuvwxyz', 6)();
   user.sendCode = code;
   await user.save();
@@ -59,11 +55,8 @@ export const sendCode = async (req, res, next) => {
 export const forgetPassword = async (req, res, next) => {
   const { email, password, code } = req.body;
   const user = await userModel.findOne({ email });
-  if (!user)
-    return res.status(404).json({ message: 'Email not found' });
-  if (user.sendCode != code) {
-    return res.status(403).json({ message: 'Invalid code' });
-  }
+  if (!user) return next(new AppError('Email not found', 404));
+  if (user.sendCode !== code) return next(new AppError('Invalid code', 403));
   user.password = bcrypt.hashSync(password, parseInt(process.env.SALTROUND));
   user.sendCode = null;
   await user.save();
@@ -72,14 +65,11 @@ export const forgetPassword = async (req, res, next) => {
 
 export const changePassword = async (req, res, next) => {
   const { email, oldPassword, newPassword } = req.body;
-  if (req.user.email != email)
-    return res.status(403).json({ message: 'The email address provided does not match your account.' });
+  if (req.user.email !== email) return next(new AppError('The email address provided does not match your account.', 403));
   const user = await userModel.findOne({ email });
-  if (!user)
-    return res.status(404).json({ message: 'Email not found' });
+  if (!user) return next(new AppError('Email not found', 404));
   const isMatch = bcrypt.compareSync(oldPassword, user.password);
-  if (!isMatch)
-    return res.status(403).json({ message: 'Invalid old password' });
+  if (!isMatch) return next(new AppError('Invalid old password', 403));
   user.password = bcrypt.hashSync(newPassword, parseInt(process.env.SALTROUND));
   await user.save();
   return res.status(200).json({ message: 'Password changed successfully' });

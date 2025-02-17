@@ -1,17 +1,18 @@
 import cartModel from './../../../DB/model/cart.model.js';
 import productModel from './../../../DB/model/product.model.js';
+import { AppError } from './../../utils/AppError.js';
 
 export const getCart = async (req, res, next) => {
     const cart = await cartModel.findOne({ userId: req.user._id });
     if (!cart)
-        return res.status(404).json({ message: 'Cart not found' });
-    return res.status(200).json({ message: 'Success', products : cart.products , count : cart.products.length});
+        return next(new AppError('Cart not found', 404));
+    return res.status(200).json({ message: 'Success', products: cart.products, count: cart.products.length });
 }
 export const createCart = async (req, res, next) => {
     const { productId } = req.body;
     const checkProduct = await productModel.findById(productId);
     if (!checkProduct)
-        return res.status(404).json({ message: 'Product not found' });
+        return next(new AppError('Product not found', 404));
 
     const cart = await cartModel.findOne({ userId: req.user._id });
     // if dosen't have cart then create a new cart
@@ -22,11 +23,11 @@ export const createCart = async (req, res, next) => {
         });
         return res.status(201).json({ message: 'Product added to cart', cart: newCart });
     }
-    
+
     // if have cart already been created , need to check if it exists or not .
     for (let i = 0; i < cart.products.length; i++) {
         if (cart.products[i].productId == productId) {
-            return res.status(400).json({ message: 'Product already exists in cart' });
+            return next(new AppError('Product already exists in cart', 400));
         }
     }
     cart.products.push({ productId });
@@ -38,8 +39,7 @@ export const deleteProductFromCart = async (req, res, next) => {
     const { productId } = req.params;
     const cart = await cartModel.findOne({ userId: req.user._id });
     if (!cart || !cart.products.some(product => product.productId.toString() === productId))
-        return res.status(404).json({ message: !cart ? 'Cart not found' : 'Product not found in cart' });
-
+        return next(new AppError(!cart ? 'Cart not found' : 'Product not found in cart', 404));
     const updatedCart = await cartModel.findOneAndUpdate(
         { userId: req.user._id },
         { $pull: { products: { productId } } },
@@ -50,7 +50,7 @@ export const deleteProductFromCart = async (req, res, next) => {
 
 export const clearCart = async (req, res, next) => {
     const cart = await cartModel.findOneAndUpdate(
-        {userId: req.user._id},
+        { userId: req.user._id },
         { products: [] },
         { new: true }
     );
@@ -67,8 +67,8 @@ export const updateProductQuantity = async (req, res, next) => {
         { new: true }
     );
 
-    if (!cart) return res.status(404).json({ message: "Cart not found" });
-
+    if (!cart) return next(new AppError("Cart not found", 404));
+    
     // if quantity is 0 or less , delete product from cart
     const product = cart.products.find(p => p.productId.toString() === req.params.productId);
     if (product && product.quantity <= 0) {
