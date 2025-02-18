@@ -56,11 +56,11 @@ export const generalFields = {
     }).required().messages({
         "any.required": "Image is required."
     }),
-    categoryName: Joi.string().min(5).max(50).required().messages({
-        "string.empty": "Category name is required.",
-        "string.min": "Category name must be at least 5 characters long.",
-        "string.max": "Category name must not exceed 50 characters.",
-        "any.required": "Category name is required."
+    categoryName: Joi.string().min(3).max(50).required().messages({
+        "string.empty": "name is required.",
+        "string.min": "name must be at least 3 characters long.",
+        "string.max": "name must not exceed 50 characters.",
+        "any.required": "name is required."
     }),
 }
 export const validation = (Schema) => {

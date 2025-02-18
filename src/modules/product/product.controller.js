@@ -4,7 +4,6 @@ import subCategoryModel from './../../../DB/model/subCategory.model.js';
 import cloudinary from './../../utils/cloudinary.js';
 import productModel from '../../../DB/model/product.model.js';
 import { pagination } from '../../utils/pagination.js';
-import { request } from 'express';
 import { AppError } from './../../utils/AppError.js';
 
 export const createProduct = async (req, res, next) => {
