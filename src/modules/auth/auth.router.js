@@ -13,7 +13,7 @@ router.post('/login', asyncHandler(validation(Schema.loginSchema)) , asyncHandle
 router.get('/confirmEmail/:token' , asyncHandler(authController.confirmEmail));
 router.patch('/sendCode', asyncHandler(validation(Schema.sendCodeSchema)) , asyncHandler(authController.sendCode));
 router.patch('/forgetPassword', asyncHandler(validation(Schema.forgetPasswordSchema)) , asyncHandler(authController.forgetPassword));
-router.patch('/changePassword', asyncHandler(auth(endPoints.changePassword)), asyncHandler(validation(Schema.changePasswordSchema)), asyncHandler(authController.changePassword));
+router.patch('/changePassword', asyncHandler(validation(Schema.changePasswordSchema)), asyncHandler(auth(endPoints.changePassword)), asyncHandler(authController.changePassword));
 
 
 export default router;
