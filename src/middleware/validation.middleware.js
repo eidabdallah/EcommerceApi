@@ -20,8 +20,11 @@ export const generalFields = {
 }
 export const validation = (Schema) => {
     return (req, res, next) => {
+        let fillterData = { ...req.body, ...req.params, ...req.query };
+        if(req.file)
+            fillterData.image = req.file;
         const errorMessages = {};
-        const { error } = Schema.validate({ ...req.body, ...req.params, ...req.query }, { abortEarly: false });
+        const { error } = Schema.validate(fillterData, { abortEarly: false });
         if (error) {
             error.details.forEach((err) => {
                 const key = err.context.key;

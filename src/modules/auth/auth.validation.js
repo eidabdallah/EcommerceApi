@@ -39,8 +39,9 @@ export const forgetPasswordSchema = Joi.object({
         "any.only": "Confirm password must match the password.",
         "any.required": "Confirm password field is required.",
     }),
-    code: Joi.string().required().messages({
+    code: Joi.string().required().length(6).messages({
         "string.required": "Code field is required.",
+        "string.length": "Code is incorrect",
     }),
 });
 
