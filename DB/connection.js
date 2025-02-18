@@ -1,10 +1,28 @@
 import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
+import userModel from "./model/user.model.js";
 
 export const connectDB = async () => {
-     mongoose.connect(process.env.DB)
-          .then(() => {
-               console.log('MongoDB connected...');
-          }).catch(err => {
-               console.error('Error connecting to MongoDB:', err);
-          });
+     try {
+          await mongoose.connect(process.env.DB);
+          console.log('MongoDB connected...');
+
+          const adminExists = await userModel.findOne({ role: 'Admin' });
+          if (!adminExists) {
+               const adminPassword = bcrypt.hashSync(process.env.AdminPassword, parseInt(process.env.SALTROUND));
+               const adminUser = new userModel({
+                    userName: "Admin",
+                    email: process.env.AdminEmail,
+                    password: adminPassword,
+                    phoneNumber: "0596247255",
+                    role: "Admin",
+                    status: "Active",
+                    confirmEmail: true,
+               });
+
+               await adminUser.save();
+          }
+     } catch (err) {
+          console.error('Error connecting to MongoDB:', err);
+     }
 };

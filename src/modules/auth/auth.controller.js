@@ -26,6 +26,7 @@ export const login = async (req, res, next) => {
 }
 export const confirmEmail = async (req, res, next) => {
   const { token } = req.params;
+  if (!token) return next(new AppError("Token is required", 400));
   const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
   const user = await userModel.findOneAndUpdate(
     { email: decodedToken.email },
