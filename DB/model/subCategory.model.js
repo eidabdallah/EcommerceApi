@@ -12,7 +12,16 @@ const subCategorySchema = new Schema({
     createdBy: { type: Types.ObjectId, ref: 'User', required: true },
     updatedBy: { type: Types.ObjectId, ref: 'User', required: true },
 }, {
-    timestamps: true
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
 });
+
+subCategorySchema.virtual("products", {
+    localField: "_id",
+    foreignField: "subcategoryId",
+    ref: "Product"
+});
+
 const subCategoryModel = model('Subcategory', subCategorySchema);
 export default subCategoryModel;
