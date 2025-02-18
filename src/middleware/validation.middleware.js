@@ -17,6 +17,45 @@ export const generalFields = {
         "string.pattern.base": "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
         "any.required": "Password field is required.",
     }),
+    image: Joi.object({
+        fieldname: Joi.string().required().messages({
+            "string.empty": "Fieldname is required.",
+            "any.required": "Fieldname is required."
+        }),
+        originalname: Joi.string().required().messages({
+            "string.empty": "Original filename is required.",
+            "any.required": "Original filename is required."
+        }),
+        encoding: Joi.string().required().messages({
+            "string.empty": "Encoding type is required.",
+            "any.required": "Encoding type is required."
+        }),
+        mimetype: Joi.string()
+            .valid("image/png", "image/jpeg", "image/gif", "image/ico", "image/svg+xml")
+            .required()
+            .messages({
+                "any.only": "Invalid image format. Allowed formats: PNG, JPEG, GIF, ICO, SVG.",
+                "any.required": "MIME type is required."
+            }),
+        destination: Joi.string().required().messages({
+            "string.empty": "Destination path is required.",
+            "any.required": "Destination path is required."
+        }),
+        filename: Joi.string().required().messages({
+            "string.empty": "Filename is required.",
+            "any.required": "Filename is required."
+        }),
+        path: Joi.string().required().messages({
+            "string.empty": "File path is required.",
+            "any.required": "File path is required."
+        }),
+        size: Joi.number().max(5000000).required().messages({
+            "number.max": "File size must not exceed 5MB.",
+            "any.required": "File size is required."
+        })
+    }).required().messages({
+        "any.required": "Image is required."
+    }),
 }
 export const validation = (Schema) => {
     return (req, res, next) => {
