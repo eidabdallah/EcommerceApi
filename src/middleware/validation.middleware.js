@@ -56,11 +56,17 @@ export const generalFields = {
     }).required().messages({
         "any.required": "Image is required."
     }),
+    categoryName: Joi.string().min(5).max(50).required().messages({
+        "string.empty": "Category name is required.",
+        "string.min": "Category name must be at least 3 characters long.",
+        "string.max": "Category name must not exceed 50 characters.",
+        "any.required": "Category name is required."
+    }),
 }
 export const validation = (Schema) => {
     return (req, res, next) => {
         let fillterData = { ...req.body, ...req.params, ...req.query };
-        if(req.file)
+        if (req.file)
             fillterData.image = req.file;
         const errorMessages = {};
         const { error } = Schema.validate(fillterData, { abortEarly: false });

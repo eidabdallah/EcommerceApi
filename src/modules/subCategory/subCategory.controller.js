@@ -7,7 +7,7 @@ export const createSubCategory = async (req, res, next) => {
     const { categoryId } = req.body;
     const category = await categoryModel.findById(categoryId);
     if (!category)
-        return next(new AppError('Category ID is required.', 400));
+        return next(new AppError('Category Not Found', 404));
 
     const name = req.body.name.toLowerCase();
     if (await subCategoryModel.findOne({ name })) {
@@ -30,7 +30,7 @@ export const createSubCategory = async (req, res, next) => {
 //for admin
 export const getAllSubCategoriesByCategory = async (req, res, next) => {
     const { id } = req.params;
-    const subcategories = await subCategoryModel.find({ categoryId: id });
+    const subcategories = await subCategoryModel.find({ categoryId: id }).select('-createdBy -updatedBy -createdAt -updatedAt');
     if (subcategories.length > 0)
         return res.status(200).json({ message: 'All Subcategories for this Category retrieved successfully', subcategories });
     return next(new AppError('There are no sub categories for this category', 404));
