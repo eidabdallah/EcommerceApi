@@ -18,8 +18,9 @@ export const registerSchema = Joi.object({
         "string.pattern.base": "Phone number must be exactly 10 digits.",
         "any.required": "Phone number field is required.",
     }),
-    address: Joi.string().required().messages({
+    address: Joi.string().min(2).required().messages({
         "string.required": "Address field is required.",
+        "string.min": "Address must be at least 2 characters long.",
     }),
 });
 

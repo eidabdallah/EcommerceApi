@@ -90,10 +90,6 @@ export const getAllOrder = async (req, res, next) => {
 export const changeStatusOrder = async (req, res, next) => {
     const { orderId } = req.params;
     const { newStatus } = req.body;
-    const validStatuses = ["pending", "cancelled", "confirmed", "onway", "delivered"];
-    if (!validStatuses.includes(newStatus)) {
-        return next(new AppError('Invalid status value. Allowed values: pending, cancelled, confirmed, onway, delivered', 400));
-    }
     const order = await orderModel.findById(orderId);
     if (!order)
         return next(new AppError('Order not found.', 404));
