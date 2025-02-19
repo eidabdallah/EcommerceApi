@@ -5,12 +5,7 @@ export const createCoupon = async (req, res, next) => {
     if (await couponModel.findOne({ name: req.body.name })) {
         return next(new AppError('Coupon name already exists', 409));
     }
-    if (req.body.expireDate) {
-        let newExpireDate = new Date(req.body.expireDate);
-        if (newExpireDate < Date.now())
-            return next(new AppError('Coupon cannot be expired before the current date', 400)); // استبدل هذا
-        req.body.expireDate = newExpireDate;
-    }
+    req.body.expireDate = new Date(req.body.expireDate);
     req.body.createdBy = req.user._id;
     req.body.updatedBy = req.user._id;
     const coupon = await couponModel.create(req.body);
