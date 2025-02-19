@@ -1,7 +1,9 @@
 import multer from 'multer';
+import { AppError } from './AppError.js';
 export const fileMimeTypes = {
     image: ['image/png', 'image/jpeg', 'image/gif', 'image/ico', 'image/svg+xml'],
-    pdf: ['application/pdf']
+    pdf: ['application/pdf'],
+    excel : ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
 }
 export function fileUpload(customTypes = []) {
     const storage = multer.diskStorage({});
@@ -9,7 +11,7 @@ export function fileUpload(customTypes = []) {
         if (customTypes.includes(file.mimetype)) {
             cb(null, true);
         } else {
-            cb("invalid format", false);
+            cb(new AppError("Invalid file format", 400), false);
         }
     }
     const upload = multer({ fileFilter, storage });
