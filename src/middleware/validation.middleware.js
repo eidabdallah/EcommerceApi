@@ -65,9 +65,13 @@ export const generalFields = {
 }
 export const validation = (Schema) => {
     return (req, res, next) => {
-        let fillterData = { ...req.body, ...req.params, ...req.query };
+        let fillterData = {};
         if (req.file)
-            fillterData.image = req.file;
+            fillterData = { image: req.file, ...req.body, ...req.params, ...req.query };
+        else if (req.files)
+            fillterData = { ...req.files , ...req.body, ...req.params, ...req.query };
+        else
+            fillterData = { ...req.body, ...req.params, ...req.query };
         const errorMessages = {};
         const { error } = Schema.validate(fillterData, { abortEarly: false });
         if (error) {

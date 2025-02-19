@@ -26,10 +26,12 @@ export const createProduct = async (req, res, next) => {
     );
     req.body.mainImage = { secure_url, public_id };
     req.body.subImages = [];
-    for (const file of req.files.subImages) {
-        const { secure_url, public_id } = await cloudinary.uploader.upload(file.path,
-            { folder: `${process.env.APPNAME}/product/${name}/subImage` });
-        req.body.subImages.push({ secure_url, public_id });
+    if (req.files.subImages) {
+        for (const file of req.files.subImages) {
+            const { secure_url, public_id } = await cloudinary.uploader.upload(file.path,
+                { folder: `${process.env.APPNAME}/product/${name}/subImage` });
+            req.body.subImages.push({ secure_url, public_id });
+        }
     }
     req.body.createdBy = req.user._id;
     req.body.updatedBy = req.user._id;
@@ -64,17 +66,30 @@ export const getAllProducts = async (req, res, next) => {
     const count = await productModel.estimatedDocumentCount();
     if (req.query.fields)
         productQuery.select(req.query.fields);
-    const products = await productQuery.sort(req.query.sort);
+    let products = await productQuery.sort(req.query.sort);
+    products = products.map(product => {
+        return {
+            ...product.toObject(),
+            subImages: product.subImages.map(subImage => subImage.secure_url),
+            mainImage: product.mainImage.secure_url,
+        }
+    });
     return res.status(200).json({ message: 'All products retrieved successfully', count, products });
 }
 
 export const getProductById = async (req, res, next) => {
-    const product = await productModel.findById(req.params.id).populate({
+    let product = await productModel.findById(req.params.id).populate({
         path: 'reviews',
         populate: { path: 'userId', select: 'userName -_id' }
     });
     if (!product)
         return next(new AppError('Product not found', 404));
+
+    product = {
+        ...product.toObject(),
+        subImages: product.subImages.map(subImage => subImage.secure_url),
+        mainImage: product.mainImage.secure_url,
+    };
     return res.status(200).json({ message: 'Product retrieved successfully', product });
 }
 
