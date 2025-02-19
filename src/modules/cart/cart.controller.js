@@ -67,7 +67,7 @@ export const updateProductQuantity = async (req, res, next) => {
         { new: true }
     );
 
-    if (!cart) return next(new AppError("Cart not found", 404));
+    if (!cart) return next(new AppError("product not found in Cart", 404));
     
     // if quantity is 0 or less , delete product from cart
     const product = cart.products.find(p => p.productId.toString() === req.params.productId);
