@@ -2,6 +2,7 @@ import userModel from "../../../DB/model/user.model.js";
 import cartModel from './../../../DB/model/cart.model.js';
 import bcrypt from 'bcryptjs';
 import { AppError } from './../../utils/AppError.js';
+import cloudinary from './../../utils/cloudinary.js';
 
 export const getAllUser = async (req, res, next) => {
     const users = await userModel.find({}).select("-password -sendCode");
@@ -42,6 +43,38 @@ export const updateUserStatus = async (req, res, next) => {
     return res.status(200).json({ message: `User status updated to ${status}` });
 };
 
+export const updateUserInformation = async (req, res, next) => {
+    const { userName, phoneNumber, address } = req.body;
+    let updateFields = {};
+
+    const user = await userModel.findById(req.user._id);
+    if (!user) {
+        return next(new AppError('User not found', 404));
+    }
+
+    if (userName) updateFields.userName = userName;
+    if (phoneNumber) updateFields.phoneNumber = phoneNumber;
+    if (address) updateFields.address = address;
+
+    if (req.file) {
+        if (user.image && user.image.public_id) {
+            await cloudinary.uploader.destroy(user.image.public_id);
+        }
+        const { secure_url, public_id } = await cloudinary.uploader.upload(req.file.path, {
+            folder: `${process.env.APPNAME}/users`
+        });
+
+        updateFields.image = { secure_url, public_id };
+    }
+    if (Object.keys(updateFields).length === 0) {
+        return next(new AppError('No fields provided for update', 400));
+    }
+    await userModel.findByIdAndUpdate(req.user._id, updateFields, { new: true });
+
+    return res.status(200).json({ message: "User information updated successfully" });
+};
+
+
 
 
 export const adminResetUserCredentials = async (req, res, next) => {
@@ -52,7 +85,7 @@ export const adminResetUserCredentials = async (req, res, next) => {
 
     if (email != user.email)
         return next(new AppError("Email does not match with user's email", 400));
-    
+
     user.password = bcrypt.hashSync(password, parseInt(process.env.SALTROUND));
     await user.save();
     return res.status(200).json({ message: "User credentials updated successfully" });

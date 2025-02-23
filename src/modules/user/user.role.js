@@ -7,5 +7,5 @@ export const endPoints = {
     updateUser : [roles.USER,roles.ADMIN],
     deleteUser : [roles.ADMIN],
     updateStatus : [roles.ADMIN],
-    changeEmailConfirmation : [roles.ADMIN]
+    changeEmailConfirmation : [roles.ADMIN],
 }
