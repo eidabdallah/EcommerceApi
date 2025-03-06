@@ -1,10 +1,11 @@
 import { model, Schema } from 'mongoose';
+import { mongoose } from 'mongoose';
 const userSchema = new Schema({
     userName: {
         type: String,
         required: true,
         min: 3,
-        max: 20,
+        max: 30,
     },
     email: {
         type: String,
@@ -49,5 +50,5 @@ const userSchema = new Schema({
     timestamps: true
 });
 
-const userModel = model('User', userSchema);
+const userModel = mongoose.models.User || model('User', userSchema);
 export default userModel;
