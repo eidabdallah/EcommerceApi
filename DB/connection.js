@@ -5,7 +5,6 @@ import userModel from "./model/user.model.js";
 export const connectDB = async () => {
      try {
           await mongoose.connect(process.env.DB);
-          console.log('MongoDB connected...');
 
           const adminExists = await userModel.findOne({ role: 'Admin' });
           if (!adminExists) {
@@ -22,6 +21,7 @@ export const connectDB = async () => {
 
                await adminUser.save();
           }
+          console.log('MongoDB connected...');
      } catch (err) {
           console.error('Error connecting to MongoDB:', err);
      }

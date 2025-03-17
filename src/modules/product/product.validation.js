@@ -54,3 +54,33 @@ export const getAllProductsSchema = Joi.object({
     }),
 }).unknown(true);
 
+export const deleteProductSchema = Joi.object({
+    id : generalFields.id,
+});
+
+export const updateProductSchema = Joi.object({
+    id: generalFields.id.required(),
+    categoryId: generalFields.id.optional(),
+    subcategoryId: generalFields.id.optional(),
+    name: generalFields.categoryName.optional(),
+    discount: Joi.number().min(0).max(100).optional().messages({
+        "number.min": "Discount cannot be less than 0%.",
+        "number.max": "Discount cannot exceed 100%."
+    }),
+    description: Joi.string().min(10).max(1000).optional().messages({
+        "string.min": "Description must be at least 10 characters long.",
+        "string.max": "Description must not exceed 1000 characters."
+    }),
+    stock: Joi.number().integer().min(0).optional().messages({
+        "number.min": "Stock cannot be negative.",
+    }),
+    price: Joi.number().min(1).optional().messages({
+        "number.min": "Price cannot be less than 1."
+    }),
+    sizes: Joi.array().items(Joi.string().valid('Small', 'Medium', 'Large', 'xlarge', 'xxlarge')).min(1).max(5).optional().messages({
+        "array.min": "At least one size must be selected.",
+        "array.max": "No more than 5 sizes are allowed."
+    }),
+    mainImage: Joi.array().items(generalFields.image).optional(),
+    subImages: Joi.array().items(generalFields.image).max(5).optional(),
+}).unknown(true);

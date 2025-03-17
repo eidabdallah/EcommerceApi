@@ -22,14 +22,14 @@ export const createProduct = async (req, res, next) => {
     req.body.slug = slugify(name);
     req.body.finalPrice = price - ((price * (discount || 0)) / 100);
     const { secure_url, public_id } = await cloudinary.uploader.upload(req.files.mainImage[0].path,
-        { folder: `${process.env.APPNAME}/product/${name}/mainImage` }
+        { folder: `${process.env.APPNAME}/product/${req.body.slug}/mainImage` }
     );
     req.body.mainImage = { secure_url, public_id };
     req.body.subImages = [];
     if (req.files.subImages) {
         for (const file of req.files.subImages) {
             const { secure_url, public_id } = await cloudinary.uploader.upload(file.path,
-                { folder: `${process.env.APPNAME}/product/${name}/subImage` });
+                { folder: `${process.env.APPNAME}/product/${req.body.slug}/subImage` });
             req.body.subImages.push({ secure_url, public_id });
         }
     }
@@ -93,3 +93,73 @@ export const getProductById = async (req, res, next) => {
     return res.status(200).json({ message: 'Product retrieved successfully', product });
 }
 
+export const deleteProduct = async (req, res, next) => {
+    const product = await productModel.findByIdAndDelete(req.params.id);
+    if (!product)
+        return next(new AppError('Product not found', 404));
+
+    await cloudinary.uploader.destroy(product.mainImage.public_id);
+    if (product.subImages.length > 0) {
+        for (const subImage of product.subImages) {
+            await cloudinary.uploader.destroy(subImage.public_id);
+        }
+    }
+    return res.status(200).json({ message: 'Product deleted successfully' });
+}
+
+export const updateProduct = async (req, res, next) => {
+    const { name, price, description, discount, categoryId, subcategoryId, stock } = req.body;
+
+    const checkCategory = await categoryModel.findById(categoryId);
+    if (!checkCategory) return next(new AppError('Category not found', 404));
+
+    const checkSubCategory = subcategoryId ? await subCategoryModel.findOne({ _id: subcategoryId, categoryId }) : null;
+    if (!checkSubCategory) return next(new AppError('Subcategory does not belong to the selected category', 404));
+
+    const product = await productModel.findById(req.params.id);
+    if (!product) return next(new AppError('Product not found', 404));
+
+    product.categoryId = categoryId;
+    product.subcategoryId = subcategoryId;
+
+    if (name) {
+        name = name.trim();
+        if (product.name.toLowerCase() !== name.toLowerCase() && await productModel.findOne({ name }))
+            return next(new AppError('Product Name already exists', 409));
+        product.name = name;
+        product.slug = slugify(name);
+    }
+
+    if (price) product.price = price;
+    if (discount) product.discount = discount;
+    product.finalPrice = product.price - ((product.price * (product.discount || 0)) / 100);
+
+    if (description) product.description = description;
+    if (stock) product.stock = stock;
+
+    if (req.files.mainImage) {
+        const { secure_url, public_id } = await cloudinary.uploader.upload(req.files.mainImage[0].path,
+            { folder: `${process.env.APPNAME}/product/${product.slug}/mainImage` }
+        );
+        if (secure_url && public_id) {
+            await cloudinary.uploader.destroy(product.mainImage.public_id);
+            product.mainImage = { secure_url, public_id };
+        }
+    }
+
+    if (req.files.subImages) {
+        await Promise.all(product.subImages.map(subImage => cloudinary.uploader.destroy(subImage.public_id)));
+
+        product.subImages = await Promise.all(req.files.subImages.map(async (file) => {
+            const { secure_url, public_id } = await cloudinary.uploader.upload(file.path,
+                { folder: `${process.env.APPNAME}/product/${product.slug}/subImage` }
+            );
+            return { secure_url, public_id };
+        }));
+    }
+
+    product.updatedBy = req.user._id;
+    await product.save();
+
+    return res.status(200).json({ message: 'Product updated successfully', product });
+}
