@@ -81,7 +81,8 @@ export const createOrder = async (req, res, next) => {
 }
 // for admin
 export const getAllOrder = async (req, res, next) => {
-    const orders = await orderModel.find({ $or: [{ status: 'pending' }, { status: 'confirmed' }] });
+    const { status } = req.query;
+    const orders = await orderModel.find({ status: status });
     if (orders.length > 0)
         return res.status(200).json({ message: 'All orders retrieved successfully', orders });
     return next(new AppError('There are no orders.', 404));
