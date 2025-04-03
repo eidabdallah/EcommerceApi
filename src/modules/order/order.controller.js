@@ -82,7 +82,7 @@ export const createOrder = async (req, res, next) => {
 // for admin
 export const getAllOrder = async (req, res, next) => {
     const { status } = req.query;
-    const orders = await orderModel.find({ status: status });
+    const orders = await orderModel.find({ status: status }).populate("products.productId");
     if (orders.length > 0)
         return res.status(200).json({ message: 'All orders retrieved successfully', orders });
     return next(new AppError('There are no orders.', 404));
@@ -97,12 +97,28 @@ export const changeStatusOrder = async (req, res, next) => {
     if (order.status == "delivered") {
         return next(new AppError('Cannot update a delivered order.', 400));
     }
-    if (order.status == "onway" && newStatus != "delivered") {
-        return next(new AppError("An order in 'onway' status can only be changed to 'delivered'.", 400));
+    const validTransitions = {
+        "pending": ["cancelled", "confirmed"],
+        "confirmed": ["onway"],
+        "onway": ["delivered"]
+    };
+    if (!validTransitions[currentStatus].includes(newStatus)) {
+        return next(new AppError(`An order in '${currentStatus}' can only be changed to ${validTransitions[currentStatus].join(' or ')}.`, 400));
+    }
+
+    if (order.status == "pending" && newStatus == "cancelled") {
+        for (const product of order.products) {
+            await productModel.findOneAndUpdate({ _id: product.productId }, { $inc: { stock: product.quantity } });
+        }
+        if (req.body.coupon) {
+            await couponModel.updateOne({ _id: req.body.coupon._id }, { $pull: { usedBy: req.user._id } })
+        }
     }
     order.updatedBy = req.user._id;
     order.status = newStatus;
     await order.save();
+
+
     return res.status(200).json({ message: 'Order status updated successfully', order });
 }
 
