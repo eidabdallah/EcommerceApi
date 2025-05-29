@@ -33,7 +33,7 @@ export const getAllCategories = async (req, res, next) => {
 }
 // for user 
 export const getAllCategoriesActive = async (req, res, next) => {
-    const categories = await categoryModel.find({ status: 'Active' }).select('name image');
+    const categories = await categoryModel.find({ status: 'Active' }).select('name image slug');
     if (categories.length > 0)
         return res.status(200).json({ message: 'All categories retrieved successfully', categories });
     return next(new AppError('There are no categories.', 404));

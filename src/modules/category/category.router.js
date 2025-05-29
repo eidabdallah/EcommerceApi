@@ -12,7 +12,7 @@ const router = Router({ caseSensitive: true });
 router.use('/:id/subCategory', subcategoriesRouter);
 router.post('/', fileUpload(fileMimeTypes.image).single('image'), validation(schema.createCategorySchema), asyncHandler(auth(endPoints.create)), asyncHandler(categoriesController.createCategory));
 router.get('/', asyncHandler(auth(endPoints.getAll)), asyncHandler(categoriesController.getAllCategories));
-router.get('/active', asyncHandler(auth(endPoints.getAllActive)), asyncHandler(categoriesController.getAllCategoriesActive));
+router.get('/active',  asyncHandler(categoriesController.getAllCategoriesActive));
 router.get('/:id', validation(schema.getCategoryByIdSchema), asyncHandler(auth(endPoints.getById)), asyncHandler(categoriesController.getCategoryById));
 router.patch('/:id', fileUpload(fileMimeTypes.image).single('image'), validation(schema.updateCategorySchema), asyncHandler(auth(endPoints.update)), asyncHandler(categoriesController.updateCategory));
 router.delete('/:id', validation(schema.deleteCategorySchema), asyncHandler(auth(endPoints.delete)), asyncHandler(categoriesController.deleteCategory));
