@@ -21,5 +21,7 @@ router.put('/:id',
     asyncHandler(auth(endPoints.update)), 
     asyncHandler(productController.updateProduct)
 );
+router.get('/productsCategory/:categoryId',validation(schema.getProductsByCategorySubcategoriesSchema) , asyncHandler(productController.getProductsByCategory));
+
 
 export default router;

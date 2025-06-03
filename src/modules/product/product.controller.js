@@ -53,6 +53,7 @@ export const getAllProducts = async (req, res, next) => {
     queryObj = queryObj.replace(/gt|gte|lt|lte|eq|in|nin/g, match => `$${match}`);
     // convert to Object : 
     queryObj = JSON.parse(queryObj);
+
     const productQuery = productModel.find(queryObj).skip(skip).limit(limit);
     // search  :
     if (req.query.search) {
@@ -163,3 +164,41 @@ export const updateProduct = async (req, res, next) => {
 
     return res.status(200).json({ message: 'Product updated successfully', product });
 }
+
+export const getProductsByCategory = async (req, res, next) => {
+    const { categoryId } = req.params;
+    const { skip, limit } = pagination(req.query.page, req.query.limit);
+    let queryObj = { ...req.query };
+    const excludeQuery = ['page', 'limit', 'sort', 'search', 'fields'];
+    excludeQuery.map((ele) => delete queryObj[ele]);
+
+    // filter : 
+    // Converting query data into a string so that the operator ($) can also be included : 
+    queryObj = JSON.stringify(queryObj);
+    queryObj = queryObj.replace(/gt|gte|lt|lte|eq|in|nin/g, match => `$${match}`);
+    // convert to Object : 
+    queryObj = JSON.parse(queryObj);
+
+    const productQuery = productModel.find({ categoryId, ...queryObj }).skip(skip).limit(limit);
+    // search  :
+    if (req.query.search) {
+        productQuery.find({
+            $or: [
+                { name: { $regex: req.query.search } },
+            ]
+        })
+    }
+    const count = await productModel.countDocuments({ categoryId });
+    if (req.query.fields)
+        productQuery.select(req.query.fields);
+    let products = await productQuery.sort(req.query.sort);
+    products = products.map(product => {
+        return {
+            ...product.toObject(),
+            subImages: product.subImages.map(subImage => subImage.secure_url),
+            mainImage: product.mainImage.secure_url,
+        }
+    });
+    return res.status(200).json({ message: 'All products retrieved successfully', count, products });
+
+};

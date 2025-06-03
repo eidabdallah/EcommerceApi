@@ -38,7 +38,7 @@ export const getAllSubCategoriesByCategory = async (req, res, next) => {
 // for user 
 export const getAllSubCategoriesActiveByCategory = async (req, res, next) => {
     const { id } = req.params;
-    const subcategories = await subCategoryModel.find({ categoryId: id, status: 'Active' });
+    const subcategories = await subCategoryModel.find({ categoryId: id, status: 'Active' }).populate('categoryId', 'name');;
     if (subcategories.length > 0)
         return res.status(200).json({ message: 'All Subcategories for this Category retrieved successfully', subcategories });
     return next(new AppError('There are no sub categories for this category', 404));
@@ -48,7 +48,7 @@ export const getSubCategoryById = async (req, res, next) => {
     const subCategory = await subCategoryModel.findById(req.params.id).select('name image slug').populate({
         path: 'products',
         select: 'name price stock mainImage subImages -subcategoryId',
-      });
+    });
     if (!subCategory)
         return next(new AppError('SubCategory not found.', 404));
     return res.status(200).json({ message: 'SubCategory retrieved successfully', subCategory });
