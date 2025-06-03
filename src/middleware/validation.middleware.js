@@ -31,7 +31,7 @@ export const generalFields = {
             "any.required": "Encoding type is required."
         }),
         mimetype: Joi.string()
-            .valid("image/png", "image/jpeg", "image/gif", "image/ico", "image/svg+xml")
+            .valid("image/png", "image/jpeg", "image/gif", "image/ico", "image/svg+xml" , "image/avif")
             .required()
             .messages({
                 "any.only": "Invalid image format. Allowed formats: PNG, JPEG, GIF, ICO, SVG.",
