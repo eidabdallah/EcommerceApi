@@ -15,13 +15,14 @@ router.post('/', fileUpload(fileMimeTypes.image).fields([{ name: 'mainImage', ma
 router.get('/', validation(schema.getAllProductsSchema), asyncHandler(productController.getAllProducts));
 router.get('/:id', validation(schema.getProductByIdSchema), asyncHandler(productController.getProductById));
 router.delete('/:id', validation(schema.deleteProductSchema), asyncHandler(auth(endPoints.delete)), asyncHandler(productController.deleteProduct), asyncHandler(productController.deleteProduct));
-router.put('/:id', 
-    fileUpload(fileMimeTypes.image).fields([{ name: 'mainImage', maxCount: 1 }, { name: 'subImages', maxCount: 5 }]), 
-    validation(schema.updateProductSchema), 
-    asyncHandler(auth(endPoints.update)), 
+router.put('/:id',
+    fileUpload(fileMimeTypes.image).fields([{ name: 'mainImage', maxCount: 1 }, { name: 'subImages', maxCount: 5 }]),
+    validation(schema.updateProductSchema),
+    asyncHandler(auth(endPoints.update)),
     asyncHandler(productController.updateProduct)
 );
-router.get('/productsCategory/:categoryId',validation(schema.getProductsByCategorySubcategoriesSchema) , asyncHandler(productController.getProductsByCategory));
+router.get('/productsCategory/:categoryId', validation(schema.getProductsByCategorySubcategoriesSchema), asyncHandler(productController.getProductsByCategory));
+router.get('/productsSubCategory/:subCategoryId', validation(schema.getProductsBySubcategoriesSchema), asyncHandler(productController.getProductsByCategory));
 
 
 export default router;

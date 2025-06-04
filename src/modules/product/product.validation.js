@@ -105,3 +105,23 @@ export const getProductsByCategorySubcategoriesSchema = Joi.object({
         "string.base": "Fields must be a string."
     }),
 });
+export const getProductsBySubcategoriesSchema = Joi.object({
+    subCategoryId: generalFields.id,
+    page: Joi.number().min(1).optional().messages({
+        "number.base": "Page must be a number.",
+        "number.min": "Page must be at least 1."
+    }),
+    limit: Joi.number().min(1).optional().messages({
+        "number.base": "Limit must be a number.",
+        "number.min": "Limit must be at least 1.",
+    }),
+    sort: Joi.string().optional().messages({
+        "string.base": "Sort must be a string."
+    }),
+    search: Joi.string().optional().messages({
+        "string.base": "Search query must be a string."
+    }),
+    fields: Joi.string().optional().messages({
+        "string.base": "Fields must be a string."
+    }),
+});

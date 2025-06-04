@@ -166,7 +166,7 @@ export const updateProduct = async (req, res, next) => {
 }
 
 export const getProductsByCategory = async (req, res, next) => {
-    const { categoryId } = req.params;
+    const { categoryId, subCategoryId } = req.params;
     const { skip, limit } = pagination(req.query.page, req.query.limit);
     let queryObj = { ...req.query };
     const excludeQuery = ['page', 'limit', 'sort', 'search', 'fields'];
@@ -174,12 +174,18 @@ export const getProductsByCategory = async (req, res, next) => {
 
     // filter : 
     // Converting query data into a string so that the operator ($) can also be included : 
+
     queryObj = JSON.stringify(queryObj);
     queryObj = queryObj.replace(/gt|gte|lt|lte|eq|in|nin/g, match => `$${match}`);
     // convert to Object : 
     queryObj = JSON.parse(queryObj);
 
-    const productQuery = productModel.find({ categoryId, ...queryObj }).skip(skip).limit(limit);
+    let productQuery
+    if (categoryId) {
+        productQuery = productModel.find({ categoryId, ...queryObj }).skip(skip).limit(limit);
+    } else {
+        productQuery = productModel.find({ subcategoryId:subCategoryId, ...queryObj }).skip(skip).limit(limit);
+    }
     // search  :
     if (req.query.search) {
         productQuery.find({
@@ -188,7 +194,8 @@ export const getProductsByCategory = async (req, res, next) => {
             ]
         })
     }
-    const count = await productModel.countDocuments({ categoryId });
+    const filter = categoryId ? { categoryId } : subCategoryId ? { subcategoryId: subCategoryId } : {};
+    const count = await productModel.countDocuments(filter);
     if (req.query.fields)
         productQuery.select(req.query.fields);
     let products = await productQuery.sort(req.query.sort);
