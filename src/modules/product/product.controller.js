@@ -81,8 +81,11 @@ export const getAllProducts = async (req, res, next) => {
 export const getProductById = async (req, res, next) => {
     let product = await productModel.findById(req.params.id).populate({
         path: 'reviews',
-        populate: { path: 'userId', select: 'userName -_id' }
-    });
+        populate: { path: 'userId', select: 'userName' }
+    }).populate({ path: 'categoryId', select: 'name' })
+        .populate({
+            path: 'subcategoryId', select: 'name'
+        });
     if (!product)
         return next(new AppError('Product not found', 404));
 
@@ -184,7 +187,7 @@ export const getProductsByCategory = async (req, res, next) => {
     if (categoryId) {
         productQuery = productModel.find({ categoryId, ...queryObj }).skip(skip).limit(limit);
     } else {
-        productQuery = productModel.find({ subcategoryId:subCategoryId, ...queryObj }).skip(skip).limit(limit);
+        productQuery = productModel.find({ subcategoryId: subCategoryId, ...queryObj }).skip(skip).limit(limit);
     }
     // search  :
     if (req.query.search) {
