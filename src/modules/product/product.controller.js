@@ -60,7 +60,6 @@ export const getAllProducts = async (req, res, next) => {
         productQuery.find({
             $or: [
                 { name: { $regex: req.query.search } },
-                { description: { $regex: req.query.search } },
             ]
         })
     }

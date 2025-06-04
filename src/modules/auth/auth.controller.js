@@ -21,7 +21,7 @@ export const login = async (req, res, next) => {
   const isMatch = bcrypt.compareSync(password, user.password);
   if (!isMatch) return next(new AppError('Invalid credentials', 400));
   if (user.status === 'NotActive') return next(new AppError('Your Account is Blocked', 400));
-  const token = jwt.sign({ id: user._id, role: user.role, status: user.status }, process.env.JWT_SECRET, { expiresIn: '10h' });
+  const token = jwt.sign({ id: user._id, role: user.role, status: user.status }, process.env.JWT_SECRET);
   return res.status(200).json({ message: 'Logged in successfully', token });
 }
 export const confirmEmail = async (req, res, next) => {
