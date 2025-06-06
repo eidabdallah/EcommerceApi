@@ -3,7 +3,7 @@ import productModel from './../../../DB/model/product.model.js';
 import { AppError } from './../../utils/AppError.js';
 
 export const getCart = async (req, res, next) => {
-    const cart = await cartModel.findOne({ userId: req.user._id });
+    const cart = await cartModel.findOne({ userId: req.user._id }).populate('products.productId');
     if (!cart)
         return next(new AppError('Cart not found', 404));
     return res.status(200).json({ message: 'Success', products: cart.products, count: cart.products.length });

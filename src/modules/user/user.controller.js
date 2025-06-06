@@ -12,7 +12,7 @@ export const getAllUser = async (req, res, next) => {
 }
 
 export const getUserInformation = async (req, res, next) => {
-    const user = await userModel.findById(req.user._id).select("userName email phoneNumber address");
+    const user = await userModel.findById(req.user._id).select("userName email phoneNumber address image");
     if (!user)
         return next(new AppError('User not found', 404));
 
@@ -53,7 +53,14 @@ export const updateUserInformation = async (req, res, next) => {
     }
 
     if (userName) updateFields.userName = userName;
-    if (phoneNumber) updateFields.phoneNumber = phoneNumber;
+    if (phoneNumber && phoneNumber !== user.phoneNumber) {
+        const phoneExists = await userModel.findOne({ phoneNumber });
+        if (phoneExists) {
+            return next(new AppError('Phone number already in use', 400));
+        }
+        updateFields.phoneNumber = phoneNumber;
+    }
+
     if (address) updateFields.address = address;
 
     if (req.file) {
@@ -63,16 +70,18 @@ export const updateUserInformation = async (req, res, next) => {
         const { secure_url, public_id } = await cloudinary.uploader.upload(req.file.path, {
             folder: `${process.env.APPNAME}/users`
         });
-
         updateFields.image = { secure_url, public_id };
     }
+
     if (Object.keys(updateFields).length === 0) {
         return next(new AppError('No fields provided for update', 400));
     }
+
     await userModel.findByIdAndUpdate(req.user._id, updateFields, { new: true });
 
     return res.status(200).json({ message: "User information updated successfully" });
 };
+
 
 
 
